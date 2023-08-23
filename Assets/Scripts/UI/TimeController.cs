@@ -39,6 +39,9 @@ public class TimeController : MonoBehaviour
 
     public void StartTime()
     {
+        CurrentTime = MaxTime;
+        TimeText.text = CurrentTime.Minutes + ":" + CurrentTime.Seconds;
+        StopAllCoroutines();
         StartCoroutine(TimeOn());
     }
 
@@ -59,9 +62,22 @@ public class TimeController : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
 
-        //타임오버 - Game End
-        Debug.Log("Time Over");
+        while (true)
+        {
+            if (!TileController.instance.isDropping)
+            {
+                yield return new WaitForSeconds(0.5f);
+                if (TileController.instance.isDropping)
+                {
+                    continue;
+                }
+                break;
+            }
 
+            yield return new WaitForEndOfFrame();
+        }
+
+        PopUpManager.instance.GameOver();
         yield break;
     }
 }

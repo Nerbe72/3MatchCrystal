@@ -17,6 +17,16 @@ public class PopUpManager : MonoBehaviour
 
     private void Awake()
     {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        } else
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Time.timeScale = 0f;
         Init();
     }
@@ -24,7 +34,7 @@ public class PopUpManager : MonoBehaviour
     private void Init()
     {
         m_popUp.SetActive(true);
-        m_popUpText.text = "";
+        m_popUpText.text = "Start";
         m_popUpScore.text = "";
         m_start.onClick.AddListener(GameStart);
         m_end.onClick.AddListener(GameEnd);
@@ -43,6 +53,18 @@ public class PopUpManager : MonoBehaviour
 
     private void GameEnd()
     {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
 
+    public void GameOver()
+    {
+        m_popUp.SetActive(true);
+        Time.timeScale = 0f;
+        m_popUpText.text = "GameOver";
+        m_popUpScore.text = ScoreManager.instance.TotalScore.ToString();
     }
 }

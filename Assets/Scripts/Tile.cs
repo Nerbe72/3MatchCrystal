@@ -15,7 +15,7 @@ public class Tile : MonoBehaviour
     #endregion
 
     private float check = 0;
-    private float m_fallingSpeed = 3f;
+    private float m_fallingSpeed = 2.8f;
 
     private Vector2 startPosition;
     private Vector2 destPosition;

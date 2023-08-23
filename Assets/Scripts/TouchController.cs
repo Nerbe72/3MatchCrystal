@@ -15,7 +15,7 @@ public class TouchController : MonoBehaviour
     private void Update()
     {
         //타일이 내려오고 있거나 타일이 터지는중일 때 마우스 제어 무시
-        if (TileController.instance.IsSwapRunning) return;
+        if (TileController.instance.isDropping) return;
 
         MouseDown();
         MouseUp();

@@ -16,13 +16,11 @@ public class TileController : MonoBehaviour
 
     #region 변수
     public int Combo = 0;
-    public bool IsSwapRunning = false;
+    public bool isDropping = false;
 
     private bool m_isMatched = true;
 
     private TileManager tileMng;
-    private float m_swapSpeed = 2.5f;
-    private float m_dropSpeed = 2.5f;
     private float distance = 0.05f;
 
     private List<Tile> collapseTiles = new List<Tile>();
@@ -192,6 +190,7 @@ public class TileController : MonoBehaviour
         yield return CheckMoving();
         yield return new WaitForEndOfFrame();
 
+
         //todo 반복
         if (m_isMatched)
         {
@@ -338,7 +337,7 @@ public class TileController : MonoBehaviour
 
     private IEnumerator CheckMoving()
     {
-        bool isDropping = false;
+        isDropping = false;
 
         while (true)
         {

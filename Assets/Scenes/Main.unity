@@ -247,6 +247,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 684d471176c73ab459ad803c209584d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsStarting: 0
 --- !u!1 &184664639
 GameObject:
   m_ObjectHideFlags: 0
@@ -879,7 +880,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Score
+  m_text: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1392,7 +1393,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_popUp: {fileID: 733131417}
   m_popUpText: {fileID: 955177722}
-  m_popUpScore: {fileID: 0}
+  m_popUpScore: {fileID: 1109455655}
   m_start: {fileID: 1441985976}
   m_end: {fileID: 1433246606}
 --- !u!4 &1019407475
@@ -1621,7 +1622,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TimeText: {fileID: 878260729}
-  MaxTimeSeconds: 1
+  MaxTimeSeconds: 120
 --- !u!4 &1161522292
 Transform:
   m_ObjectHideFlags: 0

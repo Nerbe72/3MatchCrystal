@@ -32,7 +32,9 @@ public class TileManager : MonoBehaviour
             return;
         }
         InitTileColorData();
-        InitTileGrid();
+
+        //크기 초기화
+        TileGrid = new Tile[xSize, ySize];
     }
 
     public Vector2 GetPositionFromXY(int _x, int _y)
@@ -56,30 +58,27 @@ public class TileManager : MonoBehaviour
         }
     }
     
-    private void InitTileGrid()
+    public void InitTileGrid()
     {
-        //크기 초기화
-        TileGrid = new Tile[xSize, ySize];
-
-        //타일 그리기
         for (int y = 0; y < ySize; y++)
         {
             for (int x = 0; x < xSize; x++)
             {
-                Tile obj = Instantiate(m_tilePrefab).GetComponent<Tile>();
-                obj.SetData(
-                    GetPositionFromXY(x, y),
-                    (TileID)Random.Range((int)TileID.Red, (int)TileID.Count),
-                    x, y);
-                TileGrid[x, y] = obj;
-
-                //if (x != 0)
-                //{
-                //    TileGrid[x - 1, y].TopTile = TileGrid[x, y];
-                //    TileGrid[x, y].BottomTile = TileGrid[x - 1, y];
-                //}
+                if (TileGrid[x, y] != null)
+                    TileGrid[x, y].BreakThis();
+                GenerateTile(x, y);
             }
         }
+    }
+
+    public void GenerateTile(int x, int y)
+    {
+        Tile obj = Instantiate(m_tilePrefab).GetComponent<Tile>();
+        obj.SetData(
+            GetPositionFromXY(x, y),
+            (TileID)Random.Range((int)TileID.Red, (int)TileID.Count),
+            x, y);
+        TileGrid[x, y] = obj;
     }
 
 }

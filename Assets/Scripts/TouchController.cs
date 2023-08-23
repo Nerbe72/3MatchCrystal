@@ -31,9 +31,6 @@ public class TouchController : MonoBehaviour
             {
                 if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Tile"))
                     target = hit.collider.GetComponent<Tile>();
-
-                if (target != null)
-                    Debug.Log("selected= " + target.Grid.x + " : " + target.Grid.y);
             }
         }
     }

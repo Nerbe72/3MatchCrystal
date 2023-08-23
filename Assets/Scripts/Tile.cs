@@ -15,7 +15,7 @@ public class Tile : MonoBehaviour
     #endregion
 
     private float check = 0;
-    private float m_fallingSpeed = 2.5f;
+    private float m_fallingSpeed = 3f;
 
     private Vector2 startPosition;
     private Vector2 destPosition;
@@ -61,16 +61,11 @@ public class Tile : MonoBehaviour
     public void SetData(Vector2 _pos, TileID _id, int _x, int _y)
     {
         transform.position = _pos;
+        startPosition = _pos;
+
         id = _id;
-
-        Grid.x = _x;
-        Grid.y = _y;
-        m_tileMng.TileGrid[_x, _y] = this;
-        check = 0f;
-        gameObject.name = $"{_x}x{_y}";
-
         m_sprite.sprite = m_tileMng.TileColor[_id];
-        startPosition = m_tileMng.GetPositionFromXY(Grid.x, Grid.y);
+        SetXY(_x, _y);
     }
 
     public void SetColor(TileID _id)
@@ -83,15 +78,15 @@ public class Tile : MonoBehaviour
     {
         Grid.x = _x;
         Grid.y = _y;
-        m_tileMng.TileGrid[Grid.x, Grid.y] = this;
         gameObject.name = $"{_x}x{_y}";
+        m_tileMng.TileGrid[Grid.x, Grid.y] = this;
     }
 
     public void SetMove(int _x, int _y)
     {
-        Grid.x = _x;
-        Grid.y = _y;
+        SetXY(_x, _y);
         destPosition = m_tileMng.GetPositionFromXY(Grid.x, Grid.y);
+        check = 0f;
         IsMoving = true;
     }
 

@@ -19,7 +19,6 @@ public class TileController : MonoBehaviour
     public bool IsSwapRunning = false;
 
     private bool m_isMatched = true;
-    private bool m_firstEnter = true;
 
     private TileManager tileMng;
     private float m_swapSpeed = 2.5f;
@@ -52,22 +51,51 @@ public class TileController : MonoBehaviour
         tileMng = TileManager.instance;
     }
 
-    //디버그 - 스페이스바로 searchAll 호출
-    private void Update()
+    public void FixTile()
     {
-        if (Input.GetKeyUp(KeyCode.Space))
+        m_isMatched = false;
+
+        for (int x = 0; x < tileMng.xSize; x++)
         {
-            if (co == null)
-                StartCoroutine(SearchingAll());
+            for (int y = 0; y < tileMng.ySize; y++)
+            {
+                if (tileMng.TileGrid[x, y] == null) continue;
+
+                //타겟의 id를 가져옴
+                TileID targetID = tileMng.TileGrid[x, y].id;
+
+                if (y >= 2)
+                    Matching(targetID, x, y, true); //우
+
+                if (x >= 2)
+                    Matching(targetID, x, y, false); //상
+            }
         }
+
+        DestroyTile();
+
+        ReFillTile();
+
+        if (m_isMatched)
+        {
+            FixTile();
+        }
+
+        m_matchedTiles.Clear();
     }
 
-    /*
-     * 가끔 타일 하나가 제자리로 돌아가는 문제
-     * 
-     * 코루틴 덜어내기
-     * 
-     */
+    private void ReFillTile()
+    {
+        for (int x = 0; x < tileMng.xSize; x++)
+        {
+            for (int y = 0; y < tileMng.ySize; y++)
+            {
+                if (tileMng.TileGrid[x, y] != null) continue;
+
+                tileMng.GenerateTile(x, y);
+            }
+        }
+    }
 
     public void Swap(Tile target, Vector2 direction)
     {
@@ -117,11 +145,10 @@ public class TileController : MonoBehaviour
         target2.SetMove(target_temp);
 
         yield return CheckMoving();
-        Debug.Log("Swap End");
-        yield return SearchingAll();
-        Debug.Log("SearchAll End");
 
-        //타일이 매칭되지 않으면 되돌림
+        yield return SearchingAll();
+
+        //타일이 매칭되지 않았으며 타일이 파괴된적 없으면(파괴된 경우 매칭된 경우를 의미) 타일을 다시 되돌림
         if (!m_isMatched &&
             (target != null && target2 != null))
         {
@@ -156,38 +183,44 @@ public class TileController : MonoBehaviour
         }
 
         DestroyTile();
-        yield return new WaitForEndOfFrame();
 
         Collapse();
-        yield return new WaitForEndOfFrame();
         SetCollapseData();
         yield return CheckMoving();
-        yield return new WaitForEndOfFrame();
 
         Drop();
         yield return CheckMoving();
         yield return new WaitForEndOfFrame();
 
-        ////todo 반복
+        //todo 반복
         if (m_isMatched)
         {
             yield return SearchingAll();
         }
 
         co = null;
+        Combo = 0;
         yield break;
     }
 
     //매칭된 타일 제거
     private void DestroyTile()
     {
+        m_dropTileCount.Clear();
+
         int count = m_matchedTiles.Count;
+
+        if (count > 0)
+            Combo += 1;
 
         for (int i = 0; i < count; i++)
         {
             AddDropCount(m_matchedTiles[i].Grid.y);
             m_matchedTiles[i].BreakThis();
         }
+
+        ScoreController.instance.AddScore(count, Combo);
+
         m_matchedTiles.Clear();
     }
 
@@ -242,10 +275,9 @@ public class TileController : MonoBehaviour
     //타일을 갯수만큼 생성하고 떨굼
     private void Drop()
     {
-
         int[] keys = m_dropTileCount.Keys.ToArray<int>();
         int length = keys.Length;
-        
+
         //키 배열 탐색을 위한 반복문
         for(int i = 0; i < length; i++)
         {
@@ -253,21 +285,18 @@ public class TileController : MonoBehaviour
             for (int x = m_dropTileCount[keys[i]]; x > 0; x--)
             {
                 Vector2 startPos = new Vector2(-2.1f + (keys[i] * 0.7f), 2.2f + (m_dropTileCount[keys[i]] - x * 0.7f));
-                Tile obj = tileMng.SetAndReturnTile(startPos, (TileID)UnityEngine.Random.Range((int)TileID.Red, (int)TileID.Count),
-                                                        tileMng.xSize - x, keys[i]);
 
-                obj.SetMove((tileMng.xSize - x, keys[i]));
+                tileMng.SetAndReturnTile(startPos, (TileID)UnityEngine.Random.Range((int)TileID.Red, (int)TileID.Count), tileMng.xSize - x, keys[i])
+                    .SetMove((tileMng.xSize - x, keys[i]));
             }
         }
-
-        m_dropTileCount.Clear();
     }
-     
+    
     private void Matching(TileID _targetID, int _x, int _y, bool _isHorizontal)
     {
         if (_isHorizontal)
         {
-            if ((tileMng.TileGrid[_x, _y - 1].id == tileMng.TileGrid[_x, _y - 2].id) && (tileMng.TileGrid[_x, _y - 1].id == _targetID))
+            if ((tileMng.TileGrid[_x, _y - 1].id == _targetID) && (tileMng.TileGrid[_x, _y - 1].id == tileMng.TileGrid[_x, _y - 2].id))
             {
                 if (!m_matchedTiles.Contains(tileMng.TileGrid[_x, _y]))
                     m_matchedTiles.Add(tileMng.TileGrid[_x, _y]);
@@ -283,7 +312,7 @@ public class TileController : MonoBehaviour
         }
         else
         {
-            if ((tileMng.TileGrid[_x - 1, _y].id == tileMng.TileGrid[_x - 2, _y].id) && (tileMng.TileGrid[_x - 1, _y].id == _targetID))
+            if ((tileMng.TileGrid[_x - 1, _y].id == _targetID) && (tileMng.TileGrid[_x - 1, _y].id == tileMng.TileGrid[_x - 2, _y].id))
             {
                 if (!m_matchedTiles.Contains(tileMng.TileGrid[_x, _y]))
                     m_matchedTiles.Add(tileMng.TileGrid[_x, _y]);
@@ -304,7 +333,7 @@ public class TileController : MonoBehaviour
         if (!m_dropTileCount.ContainsKey(_y))
             m_dropTileCount.Add(_y, 0);
 
-        m_dropTileCount[_y]++;
+        ++m_dropTileCount[_y];
     }
 
     private IEnumerator CheckMoving()
